@@ -46,7 +46,9 @@ function App() {
   };
 
   return (
-    <div className="container">
+    <div className="container" onContextMenu={(e)=> e.preventDefault()}>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.11.0/umd/react.production.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.11.0/umd/react-dom.production.min.js"></script>
       <img
         style={{ position: "relative" }}
         onClick={handleClick}
