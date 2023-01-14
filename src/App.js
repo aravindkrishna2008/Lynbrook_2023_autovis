@@ -4,7 +4,7 @@ import React from "react";
 
 function App() {
   const [state, setState] = React.useState([]);
-
+  const list = [];
   function handleClick(event) {
     if (event.target == event.currentTarget) {
       const xpos = event.clientX;
@@ -12,12 +12,24 @@ function App() {
       console.log(xpos, ypos);
       const fieldHeight = (315.5 / 739.68) * (739.68 - ypos);
       const fieldWidth = (651.25 / 1523.52) * xpos;
+      console.log("state", state);
+
       setState((prevState) => [
         ...prevState,
-        { x: xpos, y: ypos, fieldx: fieldWidth, fieldy: fieldHeight },
+        {
+          x: xpos,
+          y: ypos,
+          fieldx: fieldWidth,
+          fieldy: fieldHeight,
+        },
       ]);
       console.log([fieldHeight, fieldWidth]);
     }
+    state.forEach((item, i) => {
+      item.pos = i + 1;
+    });
+
+    console.log(state);
   }
   function handleClickMark(text) {
     var element = document.getElementById(text);
@@ -38,6 +50,54 @@ function App() {
       element2.remove();
     }
   }
+  function saveFile() {
+    var filetxt = "";
+    state.forEach(function (e) {
+      filetxt =
+        filetxt + e.fieldx.toFixed(2) + "," + e.fieldy.toFixed(2) + "\n";
+    });
+    var a = document.createElement("a");
+    a.setAttribute(
+      "href",
+      "data:text/csv;charset=utf-8," + encodeURIComponent(filetxt)
+    );
+    a.setAttribute("download", "file.csv");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  function enterCoords() {
+    var xCoords = document.getElementById("coordEnterX").value;
+    var yCoords = document.getElementById("coordEnterY").value;
+    const fieldWidth =
+      parseInt(xCoords.substring(0, xCoords.indexOf("'"))) * 12 +
+      parseFloat(
+        xCoords.substring(xCoords.indexOf("'") + 2, xCoords.indexOf('"'))
+      );
+    const fieldHeight =
+      parseInt(yCoords.substring(0, yCoords.indexOf("'"))) * 12 +
+      parseFloat(
+        yCoords.substring(yCoords.indexOf("'") + 2, yCoords.indexOf('"'))
+      );
+    const totalElem = state.length + 1;
+    const xpos = fieldWidth / (651.25 / 1523.52);
+    const ypos = 739.68 - fieldHeight / (315.5 / 739.68);
+    setState((prevState) => [
+      ...prevState,
+      {
+        x: xpos,
+        y: ypos,
+        fieldx: fieldWidth,
+        fieldy: fieldHeight,
+      },
+    ]);
+    console.log([fieldHeight, fieldWidth]);
+    console.log(state);
+    source.forEach((item, i) => {
+      item.id = i + 1;
+    });
+  }
 
   const pictureDims = {
     height: "138%",
@@ -55,6 +115,13 @@ function App() {
         height={pictureDims.height}
         width={pictureDims.width}
       />
+      <input id="coordEnterX" placeholder="Enter Coords Here for X"></input>
+      <input id="coordEnterY" placeholder="Enter Coords Here for Y"></input>
+      <button onClick={() => enterCoords()}>Submit!</button>
+      <br />
+      <br />
+      <button onClick={() => saveFile()}>Save</button>
+
       {state.map((value, index) => {
         return (
           <>
