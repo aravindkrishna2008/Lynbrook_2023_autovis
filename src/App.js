@@ -2,9 +2,8 @@ import logo from "./logo.svg";
 import "./App.css";
 import React from "react";
 
-
-var firstX=0;
-var firstY=0;
+var firstX = 0;
+var firstY = 0;
 
 function App() {
   const [state, setState] = React.useState([]);
@@ -14,16 +13,16 @@ function App() {
       const xpos = event.clientX;
       const ypos = event.clientY;
       console.log(firstX, firstY);
-      var fieldHeight = (315.5 / 739.68) * (739.68 - ypos)-firstY;
-      var fieldWidth = (651.25 / 1523.52) * xpos-firstX;
+      var fieldHeight = (315.5 / 739.68) * (739.68 - ypos) - firstY;
+      var fieldWidth = (651.25 / 1523.52) * xpos - firstX;
       // console.log("state", state);
       const newPos = state.length + 1;
-      if (newPos==1){
+      if (newPos == 1) {
         firstX = fieldWidth;
         firstY = fieldHeight;
-        console.log(firstX, firstY)
-        fieldHeight=0;
-        fieldWidth=0;
+        console.log(firstX, firstY);
+        fieldHeight = 0;
+        fieldWidth = 0;
       }
       setState((prevState) => [
         ...prevState,
@@ -84,27 +83,21 @@ function App() {
   function enterCoords() {
     var xCoords = document.getElementById("coordEnterX").value;
     var yCoords = document.getElementById("coordEnterY").value;
-    var fieldWidth =
-      parseFloat(
-        xCoords.substring(0, xCoords.indexOf('"'))
-      );
-    var fieldHeight =
-      parseFloat(
-        yCoords.substring(0, yCoords.indexOf('"'))
-      );
+    var fieldWidth = parseFloat(xCoords.substring(0, xCoords.indexOf('"')));
+    var fieldHeight = parseFloat(yCoords.substring(0, yCoords.indexOf('"')));
     const totalElem = state.length + 1;
     const xpos = fieldWidth / (651.25 / 1523.52);
     const ypos = 739.68 - fieldHeight / (315.5 / 739.68);
-    fieldWidth-=firstX;
-    fieldHeight-=firstY;
+    fieldWidth -= firstX;
+    fieldHeight -= firstY;
     console.log(xpos, ypos);
     console.log("state", state);
     const newPos = state.length + 1;
-    if (newPos==1){
+    if (newPos == 1) {
       firstX = fieldWidth;
       firstY = fieldHeight;
-      fieldHeight=0;
-      fieldWidth=0;
+      fieldHeight = 0;
+      fieldWidth = 0;
     }
 
     setState((prevState) => [
@@ -162,8 +155,34 @@ function App() {
                 borderRadius: "5px",
               }}
             >
-              {value.pos}: {value.fieldx.toFixed(2)}", 
+              {value.pos}: {value.fieldx.toFixed(2)}",
               {value.fieldy.toFixed(2)}"
+              <input
+                placeholder="speed"
+                className="input"
+                onChange={(e) => {
+                  console.log(e.target.value);
+                  const index = state.findIndex((el) => el == value);
+                  console.log(index);
+                  const newState = [...state];
+                  newState[index].speed = e.target.value;
+                  setState(newState);
+                }}
+                value={value.speed}
+              ></input>
+              <input
+                placeholder="angle"
+                className="input"
+                onChange={(e) => {
+                  console.log(e.target.value);
+                  const index = state.findIndex((el) => el == value);
+                  console.log(index);
+                  const newState = [...state];
+                  newState[index].angle = e.target.value;
+                  setState(newState);
+                }}
+                value={value.angle}
+              ></input>
             </div>
             <div
               id={`${Math.floor(value.fieldx / 12)}' ${(
