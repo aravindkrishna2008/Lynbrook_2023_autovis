@@ -1,4 +1,3 @@
-import logo from "./logo.svg";
 import "./App.css";
 import React from "react";
 
@@ -7,9 +6,8 @@ var firstY = 0;
 
 function App() {
   const [state, setState] = React.useState([]);
-  const list = [];
   function handleClick(event) {
-    if (event.target == event.currentTarget) {
+    if (event.target === event.currentTarget) {
       const xpos = event.pageX - event.currentTarget.offsetLeft;
       const ypos = event.pageY - event.currentTarget.offsetTop;
       console.log(xpos, ypos);
@@ -17,7 +15,7 @@ function App() {
       var fieldWidth = (651.25 / 1523.52) * xpos - firstX;
       // console.log("state", state);
       const newPos = state.length + 1;
-      if (newPos == 1) {
+      if (newPos === 1) {
         firstX = fieldWidth;
         firstY = fieldHeight;
         console.log(firstX, firstY);
@@ -32,6 +30,8 @@ function App() {
           fieldx: fieldWidth,
           fieldy: fieldHeight,
           pos: newPos,
+          angle: 0,
+          speed: 0,
         },
       ]);
       console.log([fieldHeight, fieldWidth]);
@@ -45,7 +45,7 @@ function App() {
   function handleClickMark(text) {
     var element = document.getElementById(text);
     console.log(element.style.display);
-    if (element.style.display == "none") {
+    if (element.style.display === "none") {
       element.style.display = "block";
     } else {
       element.style.display = "none";
@@ -54,7 +54,7 @@ function App() {
 
   function handleMarkRemove(idLabel, idMark, pos) {
     var cur = state.filter(
-      (item) => item.fieldx != idLabel && item.fieldy != idMark
+      (item) => item.fieldx !== idLabel && item.fieldy !== idMark
     );
     setState(cur);
     state.forEach((item, i) => {
@@ -85,7 +85,6 @@ function App() {
     var yCoords = document.getElementById("coordEnterY").value;
     var fieldWidth = parseFloat(xCoords.substring(0, xCoords.indexOf('"')));
     var fieldHeight = parseFloat(yCoords.substring(0, yCoords.indexOf('"')));
-    const totalElem = state.length + 1;
     const xpos = fieldWidth / (651.25 / 1523.52);
     const ypos = 739.68 - fieldHeight / (315.5 / 739.68);
     fieldWidth -= firstX;
@@ -93,7 +92,7 @@ function App() {
     console.log(xpos, ypos);
     console.log("state", state);
     const newPos = state.length + 1;
-    if (newPos == 1) {
+    if (newPos === 1) {
       firstX = fieldWidth;
       firstY = fieldHeight;
       fieldHeight = 0;
@@ -108,6 +107,8 @@ function App() {
         fieldx: fieldWidth,
         fieldy: fieldHeight,
         pos: newPos,
+        angle: 0,
+        speed: 0,
       },
     ]);
     console.log([fieldHeight, fieldWidth]);
@@ -123,6 +124,7 @@ function App() {
       <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.11.0/umd/react.production.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.11.0/umd/react-dom.production.min.js"></script>
       <img
+        alt="Field Map"
         style={{ position: "relative" }}
         onClick={handleClick}
         src={require("./Field_Map_2023.png")}
@@ -140,6 +142,7 @@ function App() {
         return (
           <>
             <div
+              key={value.fieldx + value.fieldy}
               id={`${Math.floor(value.fieldx / 12)}' ${(
                 value.fieldx % 12
               ).toFixed(2)}", ${Math.floor(value.fieldy / 12)}' ${(
@@ -162,7 +165,7 @@ function App() {
                 className="input"
                 onChange={(e) => {
                   console.log(e.target.value);
-                  const index = state.findIndex((el) => el == value);
+                  const index = state.findIndex((el) => el === value);
                   console.log(index);
                   const newState = [...state];
                   newState[index].speed = e.target.value;
@@ -175,7 +178,7 @@ function App() {
                 className="input"
                 onChange={(e) => {
                   console.log(e.target.value);
-                  const index = state.findIndex((el) => el == value);
+                  const index = state.findIndex((el) => el === value);
                   console.log(index);
                   const newState = [...state];
                   newState[index].angle = e.target.value;
