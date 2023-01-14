@@ -2,6 +2,10 @@ import logo from "./logo.svg";
 import "./App.css";
 import React from "react";
 
+
+var firstX=0;
+var firstY=0;
+
 function App() {
   const [state, setState] = React.useState([]);
   const list = [];
@@ -9,12 +13,18 @@ function App() {
     if (event.target == event.currentTarget) {
       const xpos = event.clientX;
       const ypos = event.clientY;
-      console.log(xpos, ypos);
-      const fieldHeight = (315.5 / 739.68) * (739.68 - ypos);
-      const fieldWidth = (651.25 / 1523.52) * xpos;
-      console.log("state", state);
+      console.log(firstX, firstY);
+      var fieldHeight = (315.5 / 739.68) * (739.68 - ypos)-firstY;
+      var fieldWidth = (651.25 / 1523.52) * xpos-firstX;
+      // console.log("state", state);
       const newPos = state.length + 1;
-
+      if (newPos==1){
+        firstX = fieldWidth;
+        firstY = fieldHeight;
+        console.log(firstX, firstY)
+        fieldHeight=0;
+        fieldWidth=0;
+      }
       setState((prevState) => [
         ...prevState,
         {
@@ -74,20 +84,28 @@ function App() {
   function enterCoords() {
     var xCoords = document.getElementById("coordEnterX").value;
     var yCoords = document.getElementById("coordEnterY").value;
-    const fieldWidth =
+    var fieldWidth =
       parseFloat(
         xCoords.substring(0, xCoords.indexOf('"'))
       );
-    const fieldHeight =
+    var fieldHeight =
       parseFloat(
         yCoords.substring(0, yCoords.indexOf('"'))
       );
     const totalElem = state.length + 1;
     const xpos = fieldWidth / (651.25 / 1523.52);
     const ypos = 739.68 - fieldHeight / (315.5 / 739.68);
+    fieldWidth-=firstX;
+    fieldHeight-=firstY;
     console.log(xpos, ypos);
     console.log("state", state);
     const newPos = state.length + 1;
+    if (newPos==1){
+      firstX = fieldWidth;
+      firstY = fieldHeight;
+      fieldHeight=0;
+      fieldWidth=0;
+    }
 
     setState((prevState) => [
       ...prevState,
