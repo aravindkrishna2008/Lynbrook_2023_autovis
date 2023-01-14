@@ -3,8 +3,13 @@ import "./App.css";
 import React from "react";
 
 function App() {
-  const [state, setState] = React.useState([]);
+  const [obj, setObj] = React.useState([]);
   const list = [];
+
+  React.useEffect(() => {
+    console.log(obj);
+  }, [obj]);
+
   function handleClick(event) {
     if (event.target == event.currentTarget) {
       const xpos = event.clientX;
@@ -12,26 +17,31 @@ function App() {
       console.log(xpos, ypos);
       const fieldHeight = (315.5 / 739.68) * (739.68 - ypos);
       const fieldWidth = (651.25 / 1523.52) * xpos;
-      console.log("state", state);
-      const newPos = state.length + 1;
-
-      setState((prevState) => [
-        ...prevState,
-        {
-          x: xpos,
-          y: ypos,
-          fieldx: fieldWidth,
-          fieldy: fieldHeight,
-          pos: newPos,
-        },
-      ]);
+      console.table({
+        d,
+        obj,
+      });
+      setObj((d) => {
+        return (
+          [
+            ...d,
+            {
+              x: xpos,
+              y: ypos,
+              fieldx: fieldWidth,
+              fieldy: fieldHeight,
+            },
+          ],
+          () => console.table({ obj, d })
+        );
+      });
       console.log([fieldHeight, fieldWidth]);
     }
-    state.forEach((item, i) => {
+    obj.forEach((item, i) => {
       item.pos = i + 1;
     });
 
-    console.log(state);
+    console.log(obj);
   }
   function handleClickMark(text) {
     var element = document.getElementById(text);
@@ -43,20 +53,18 @@ function App() {
     }
   }
 
-  function handleMarkRemove(idLabel, idMark, pos) {
-    var cur = state.filter(
+  function handleMarkRemove(idLabel, idMark) {
+    var cur = obj.filter(
       (item) => item.fieldx != idLabel && item.fieldy != idMark
     );
-    setState(cur);
-    state.forEach((item, i) => {
-      if (pos < item.pos) {
-        item.pos = i;
-      }
+    setObj(cur);
+    obj.forEach((item, i) => {
+      item.pos = i + 1;
     });
   }
   function saveFile() {
     var filetxt = "";
-    state.forEach(function (e) {
+    obj.forEach(function (e) {
       filetxt =
         filetxt + e.fieldx.toFixed(2) + "," + e.fieldy.toFixed(2) + "\n";
     });
@@ -84,11 +92,11 @@ function App() {
       parseFloat(
         yCoords.substring(yCoords.indexOf("'") + 2, yCoords.indexOf('"'))
       );
-    const totalElem = state.length + 1;
+    const totalElem = obj.length + 1;
     const xpos = fieldWidth / (651.25 / 1523.52);
     const ypos = 739.68 - fieldHeight / (315.5 / 739.68);
-    setState((prevState) => [
-      ...prevState,
+    setObj((prevobj) => [
+      ...prevobj,
       {
         x: xpos,
         y: ypos,
@@ -97,9 +105,9 @@ function App() {
       },
     ]);
     console.log([fieldHeight, fieldWidth]);
-    console.log(state);
-    state.forEach((item, i) => {
-      item.pos = i - 1;
+    console.log(obj);
+    obj.forEach((item, i) => {
+      item.id = i + 1;
     });
   }
 
@@ -125,8 +133,8 @@ function App() {
       <br />
       <br />
       <button onClick={() => saveFile()}>Save</button>
-
-      {state.map((value, index) => {
+      {JSON.stringify(obj)}
+      {/* {obj.map((value, index) => {
         return (
           <>
             <div
@@ -144,9 +152,9 @@ function App() {
                 display: "flex-row",
                 borderRadius: "5px",
               }}
+              key={`karthik-microprocessor-${index}`}
             >
-              {value.pos}: {Math.floor(value.fieldx / 12)}'{" "}
-              {(value.fieldx % 12).toFixed(2)}
+              {Math.floor(value.fieldx / 12)}' {(value.fieldx % 12).toFixed(2)}
               ", {Math.floor(value.fieldy / 12)}'{" "}
               {(value.fieldy % 12).toFixed(2)}"
             </div>
@@ -175,9 +183,7 @@ function App() {
                   ).toFixed(2)}"`
                 )
               }
-              onContextMenu={() =>
-                handleMarkRemove(value.fieldx, value.fieldy, value.pos)
-              }
+              onContextMenu={() => handleMarkRemove(value.fieldx, value.fieldy)}
             >
               <div
                 style={{
@@ -193,7 +199,7 @@ function App() {
             </div>
           </>
         );
-      })}
+      })} */}
     </div>
   );
 }
