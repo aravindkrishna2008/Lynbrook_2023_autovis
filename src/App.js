@@ -11,9 +11,9 @@ function App() {
   const list = [];
   function handleClick(event) {
     if (event.target == event.currentTarget) {
-      const xpos = event.clientX;
-      const ypos = event.clientY;
-      console.log(firstX, firstY);
+      const xpos = event.pageX - event.currentTarget.offsetLeft;
+      const ypos = event.pageY - event.currentTarget.offsetTop;
+      console.log(xpos, ypos);
       var fieldHeight = (315.5 / 739.68) * (739.68 - ypos)-firstY;
       var fieldWidth = (651.25 / 1523.52) * xpos-firstX;
       // console.log("state", state);
