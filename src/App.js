@@ -2,6 +2,10 @@ import logo from "./logo.svg";
 import "./App.css";
 import React from "react";
 
+
+var firstX=0;
+var firstY=0;
+
 function App() {
   const [state, setState] = React.useState([]);
   const list = [];
@@ -9,12 +13,18 @@ function App() {
     if (event.target == event.currentTarget) {
       const xpos = event.clientX;
       const ypos = event.clientY;
-      console.log(xpos, ypos);
-      const fieldHeight = (315.5 / 739.68) * (739.68 - ypos);
-      const fieldWidth = (651.25 / 1523.52) * xpos;
-      console.log("state", state);
+      console.log(firstX, firstY);
+      var fieldHeight = (315.5 / 739.68) * (739.68 - ypos)-firstY;
+      var fieldWidth = (651.25 / 1523.52) * xpos-firstX;
+      // console.log("state", state);
       const newPos = state.length + 1;
-
+      if (newPos==1){
+        firstX = fieldWidth;
+        firstY = fieldHeight;
+        console.log(firstX, firstY)
+        fieldHeight=0;
+        fieldWidth=0;
+      }
       setState((prevState) => [
         ...prevState,
         {
@@ -74,19 +84,29 @@ function App() {
   function enterCoords() {
     var xCoords = document.getElementById("coordEnterX").value;
     var yCoords = document.getElementById("coordEnterY").value;
-    const fieldWidth =
-      parseInt(xCoords.substring(0, xCoords.indexOf("'"))) * 12 +
+    var fieldWidth =
       parseFloat(
-        xCoords.substring(xCoords.indexOf("'") + 2, xCoords.indexOf('"'))
+        xCoords.substring(0, xCoords.indexOf('"'))
       );
-    const fieldHeight =
-      parseInt(yCoords.substring(0, yCoords.indexOf("'"))) * 12 +
+    var fieldHeight =
       parseFloat(
-        yCoords.substring(yCoords.indexOf("'") + 2, yCoords.indexOf('"'))
+        yCoords.substring(0, yCoords.indexOf('"'))
       );
     const totalElem = state.length + 1;
     const xpos = fieldWidth / (651.25 / 1523.52);
     const ypos = 739.68 - fieldHeight / (315.5 / 739.68);
+    fieldWidth-=firstX;
+    fieldHeight-=firstY;
+    console.log(xpos, ypos);
+    console.log("state", state);
+    const newPos = state.length + 1;
+    if (newPos==1){
+      firstX = fieldWidth;
+      firstY = fieldHeight;
+      fieldHeight=0;
+      fieldWidth=0;
+    }
+
     setState((prevState) => [
       ...prevState,
       {
@@ -94,13 +114,10 @@ function App() {
         y: ypos,
         fieldx: fieldWidth,
         fieldy: fieldHeight,
+        pos: newPos,
       },
     ]);
     console.log([fieldHeight, fieldWidth]);
-    console.log(state);
-    state.forEach((item, i) => {
-      item.pos = i - 1;
-    });
   }
 
   const pictureDims = {
@@ -145,10 +162,8 @@ function App() {
                 borderRadius: "5px",
               }}
             >
-              {value.pos}: {Math.floor(value.fieldx / 12)}'{" "}
-              {(value.fieldx % 12).toFixed(2)}
-              ", {Math.floor(value.fieldy / 12)}'{" "}
-              {(value.fieldy % 12).toFixed(2)}"
+              {value.pos}: {value.fieldx.toFixed(2)}", 
+              {value.fieldy.toFixed(2)}"
             </div>
             <div
               id={`${Math.floor(value.fieldx / 12)}' ${(
