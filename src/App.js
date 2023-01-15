@@ -1,28 +1,109 @@
 import logo from "./logo.svg";
 import "./App.css";
-import React from "react";
+import React, {useState} from "react";
+import { toBeInTheDOM } from "@testing-library/jest-dom/dist/matchers";
 
-var firstX = 0;
-var firstY = 0;
+const allowedExtensions = ["csv"];
+
+var firstX=0;
+var firstY=0;
+
+var isDown =false;
+
+var offsetX=0;
+var offsetY=0;
+
+var initialXReal =0;
+var initialYReal =0;
 
 function App() {
-  const [state, setState] = React.useState([]);
-  const list = [];
-  function handleClick(event) {
-    if (event.target == event.currentTarget) {
-      const xpos = event.clientX;
-      const ypos = event.clientY;
-      console.log(firstX, firstY);
-      var fieldHeight = (315.5 / 739.68) * (739.68 - ypos) - firstY;
-      var fieldWidth = (651.25 / 1523.52) * xpos - firstX;
-      // console.log("state", state);
+  const [state, setState] = useState([]);
+     
+  // // It state will contain the error when
+  // // correct file extension is not used
+  // const [error, setError] = useState("");
+   
+  // It will store the file uploaded by the user
+  const [file, setFile] = useState("");
+
+  const [array, setArray] = useState([]);
+
+  // This function will be called when
+  // the file input changes
+  const handleFileChange = (e) => {
+      setFile(e.target.files[0]);
+  };
+  const csvFileToArray = string => {
+    const csvHeader = string.slice(0, string.indexOf("\n")).split(",");
+    const csvRows = string.slice(string.indexOf("\n") + 1).split("\n");
+
+    const array = csvRows.map(i => {
+      const values = i.split(",");
+      const obj = csvHeader.reduce((object, header, index) => {
+        object[header] = values[index];
+        return object;
+      }, {});
+      return obj;
+    });
+
+    setArray(array);
+    console.log(array);
+    for(var i=0; i<array.length-1; i++){
+      var fieldHeight = parseInt(array[i]["height"]);
+      var fieldWidth = parseInt(array[i]["width"]);
+      console.log(array[i], fieldHeight, fieldWidth);
+      const ypos = 739.68-fieldHeight/(315.5/739.68);
+      const xpos = fieldWidth/(651.25/1523.52);
+      console.log(xpos, ypos)
       const newPos = state.length + 1;
-      if (newPos == 1) {
+      if (newPos==1){
         firstX = fieldWidth;
         firstY = fieldHeight;
-        console.log(firstX, firstY);
-        fieldHeight = 0;
-        fieldWidth = 0;
+        console.log(firstX, firstY)
+        fieldHeight=0;
+        fieldWidth=0;
+      }
+      state.push({
+          x: xpos,
+          y: ypos,
+          fieldx: fieldWidth,
+          fieldy: fieldHeight,
+          pos: newPos,
+        });
+    }
+    console.log(state)
+
+  };
+
+  const handleParse = (e) => {
+      
+      e.preventDefault();
+      const reader = new FileReader();
+       
+      if(file){
+        reader.onload = function(event) {
+          const text = event.target.result;
+          csvFileToArray(text);
+        }
+        reader.readAsText(file);
+      }
+  };
+
+  function handleClick(event) {
+    if (event.target == event.currentTarget) {
+      const xpos = event.pageX - event.currentTarget.offsetLeft;
+      const ypos = event.pageY - event.currentTarget.offsetTop;
+      console.log(xpos, ypos);
+      var fieldHeight = (315.5 / 739.68) * (739.68 - ypos)-firstY;
+      var fieldWidth = (651.25 / 1523.52) * xpos-firstX;
+      // console.log("state", state);
+      const newPos = state.length + 1;
+      if (newPos==1){
+        firstX = fieldWidth;
+        firstY = fieldHeight;
+        console.log(firstX, firstY)
+        fieldHeight=0;
+        fieldWidth=0;
       }
       setState((prevState) => [
         ...prevState,
@@ -44,7 +125,7 @@ function App() {
   }
   function handleClickMark(text) {
     var element = document.getElementById(text);
-    console.log(element.style.display);
+    console.log(element);
     if (element.style.display == "none") {
       element.style.display = "block";
     } else {
@@ -52,9 +133,9 @@ function App() {
     }
   }
 
-  function handleMarkRemove(idLabel, idMark, pos) {
+  function handleMarkRemove(fieldx, fieldy, pos) {
     var cur = state.filter(
-      (item) => item.fieldx != idLabel && item.fieldy != idMark
+      (item) => item.fieldx != fieldx && item.fieldy != fieldy
     );
     setState(cur);
     state.forEach((item, i) => {
@@ -62,42 +143,62 @@ function App() {
         item.pos = i;
       }
     });
+    console.log(state)
   }
   function saveFile() {
-    var filetxt = "";
+    var filetxtRel = "";
+    var filetxtAbs = "";
+    filetxtRel+="width,height\n"
+    filetxtAbs+="width,height\n"
     state.forEach(function (e) {
-      filetxt =
-        filetxt + e.fieldx.toFixed(2) + "," + e.fieldy.toFixed(2) + "\n";
+      filetxtRel =
+        filetxtRel + e.fieldx.toFixed(2) + "," + e.fieldy.toFixed(2) + "\n";
+      filetxtAbs+=((e.fieldx+firstX).toFixed(2) + "," + (e.fieldy+firstY).toFixed(2) + "\n")
     });
     var a = document.createElement("a");
     a.setAttribute(
       "href",
-      "data:text/csv;charset=utf-8," + encodeURIComponent(filetxt)
+      "data:text/csv;charset=utf-8," + encodeURIComponent(filetxtAbs)
     );
-    a.setAttribute("download", "file.csv");
+    a.setAttribute("download", "fileAbs.csv");
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    document.body.removeChild(a);    
+    // var a = document.createElement("a");
+    // a.setAttribute(
+    //   "href",
+    //   "data:text/csv;charset=utf-8," + encodeURIComponent(filetxtRel)
+    // );
+    // a.setAttribute("download", "fileRel.csv");
+    // document.body.appendChild(a);
+    // a.click();
+    // document.body.removeChild(a);
   }
 
   function enterCoords() {
     var xCoords = document.getElementById("coordEnterX").value;
     var yCoords = document.getElementById("coordEnterY").value;
-    var fieldWidth = parseFloat(xCoords.substring(0, xCoords.indexOf('"')));
-    var fieldHeight = parseFloat(yCoords.substring(0, yCoords.indexOf('"')));
+    var fieldWidth =
+      parseFloat(
+        xCoords.substring(0, xCoords.indexOf('"'))
+      );
+    var fieldHeight =
+      parseFloat(
+        yCoords.substring(0, yCoords.indexOf('"'))
+      );
     const totalElem = state.length + 1;
-    const xpos = fieldWidth / (651.25 / 1523.52);
-    const ypos = 739.68 - fieldHeight / (315.5 / 739.68);
-    fieldWidth -= firstX;
-    fieldHeight -= firstY;
+    var xpos = fieldWidth / (651.25 / 1523.52);
+    var ypos = 739.68 - fieldHeight / (315.5 / 739.68);
+    fieldWidth-=firstX;
+    fieldHeight-=firstY;
     console.log(xpos, ypos);
     console.log("state", state);
     const newPos = state.length + 1;
-    if (newPos == 1) {
+    if (newPos==1){
       firstX = fieldWidth;
       firstY = fieldHeight;
-      fieldHeight = 0;
-      fieldWidth = 0;
+      fieldHeight=0;
+      fieldWidth=0;
     }
 
     setState((prevState) => [
@@ -111,6 +212,53 @@ function App() {
       },
     ]);
     console.log([fieldHeight, fieldWidth]);
+  }
+  
+  function HandleDown(event, initialX, initialY){
+    isDown=true;
+    const xpos = event.pageX - event.currentTarget.offsetLeft;
+    const ypos = event.pageY - event.currentTarget.offsetTop;
+    offsetX = -1*xpos;
+    offsetY = -1*ypos;
+    initialXReal=initialX;
+    initialYReal=initialY;
+  }
+
+  function HandleDrag(event, pos){
+    if(isDown){
+      state.forEach((item, i) => {
+        console.log(item.pos, pos)
+        if (item.pos==pos){
+          console.log(item)
+          console.log("handled");
+          const xpos = event.pageX - event.currentTarget.offsetLeft+offsetX;
+          const ypos = event.pageY - event.currentTarget.offsetTop+offsetY;
+          console.log(xpos, ypos, item.x, item.y);
+          item.x = initialXReal+xpos;
+          item.y = initialYReal+ypos;
+          item.fieldy = (315.5 / 739.68) * (739.68 - item.y)-firstY;
+          item.fieldx = (651.25 / 1523.52) * item.x-firstX;
+        }
+      })
+    }
+  }
+
+  function HandleUp(fieldX, fieldY, X, Y, Pos){
+    isDown=false;
+    var cur = state.filter((item) => {
+      return item.fieldx!=fieldX&&item.fieldy!=fieldY;
+    })
+    setState(cur);
+    setState((prevState) => [
+      ...prevState,
+      {
+        x: X,
+        y: Y,
+        fieldx: fieldX,
+        fieldy: fieldY,
+        pos: Pos,
+      },
+    ]);
   }
 
   const pictureDims = {
@@ -135,6 +283,15 @@ function App() {
       <br />
       <br />
       <button onClick={() => saveFile()}>Save</button>
+      <form>
+        <input
+            onChange={handleFileChange}
+            id="csvInput"
+            name="file"
+            type="File"
+        />
+        <button onClick={(event) => {handleParse(event)}}>Parse</button>
+      </form>
 
       {state.map((value, index) => {
         return (
@@ -155,34 +312,8 @@ function App() {
                 borderRadius: "5px",
               }}
             >
-              {value.pos}: {value.fieldx.toFixed(2)}",
+              {value.pos}: {value.fieldx.toFixed(2)}", 
               {value.fieldy.toFixed(2)}"
-              <input
-                placeholder="speed"
-                className="input"
-                onChange={(e) => {
-                  console.log(e.target.value);
-                  const index = state.findIndex((el) => el == value);
-                  console.log(index);
-                  const newState = [...state];
-                  newState[index].speed = e.target.value;
-                  setState(newState);
-                }}
-                value={value.speed}
-              ></input>
-              <input
-                placeholder="angle"
-                className="input"
-                onChange={(e) => {
-                  console.log(e.target.value);
-                  const index = state.findIndex((el) => el == value);
-                  console.log(index);
-                  const newState = [...state];
-                  newState[index].angle = e.target.value;
-                  setState(newState);
-                }}
-                value={value.angle}
-              ></input>
             </div>
             <div
               id={`${Math.floor(value.fieldx / 12)}' ${(
@@ -212,6 +343,9 @@ function App() {
               onContextMenu={() =>
                 handleMarkRemove(value.fieldx, value.fieldy, value.pos)
               }
+              onMouseDown={(event) => HandleDown(event, value.x, value.y)}
+              onMouseUp={() => HandleUp(value.fieldx, value.fieldy, value.x, value.y, value.pos)}
+              onMouseMove = {(event) => HandleDrag(event, value.pos)}
             >
               <div
                 style={{
